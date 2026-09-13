@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/* The app is dark only, so the theme is set here in one place instead of
+   leaving the light/dark variables that create-next-app ships with. */
+:root {
+  --background: #030712;
+  --foreground: #ededed;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  /* System font stack on purpose — next/font downloads from Google at build
+     time, which means no build without an internet connection. */
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Long link lists look much better with a thin scrollbar than the default one */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #030712;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1f2937;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #374151;
+}
+
+::selection {
+  background: #1d4ed8;
+  color: #ffffff;
+}
