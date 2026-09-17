@@ -1,4 +1,4 @@
-
+// Top bar shown on every page.
 
 'use client';
 
@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const LINKS = [
-  ['/', 'Scraper'],
+  ['/', 'Analyse'],
   ['/history', 'History'],
   ['/about', 'About'],
 ];
@@ -15,21 +15,25 @@ export default function NavBar() {
   const pathname = usePathname();
 
   return (
-    <nav className="sticky top-0 z-10 border-b border-gray-800 bg-gray-950/80 px-4 py-4 backdrop-blur">
-      <div className="mx-auto flex max-w-3xl items-center justify-between">
-        <Link href="/" className="text-lg font-bold text-white">
-          Web<span className="text-blue-500">Scraper</span>
+    <nav className="sticky top-0 z-20 border-b border-gray-800 bg-gray-950/85 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-1 py-3">
+        <Link href="/" className="flex shrink-0 items-center gap-2">
+          
+          <span className="text-3xl font-semibold tracking-tight text-white">
+            Site<span className="text-blue-400">Lens</span>
+          </span>
         </Link>
 
-        <div className="flex items-center gap-1">
+        {/* the pill background makes the active page obvious without shouting */}
+        <div className="flex items-center gap-1 rounded-lg bg-gray-900/70 p-1">
           {LINKS.map(([href, label]) => (
             <Link
               key={href}
               href={href}
-              className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${
+              className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
                 pathname === href
                   ? 'bg-gray-800 font-medium text-white'
-                  : 'text-gray-500 hover:text-gray-200'
+                  : 'text-gray-400 hover:text-white'
               }`}
             >
               {label}

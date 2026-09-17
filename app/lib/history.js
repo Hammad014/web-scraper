@@ -1,4 +1,4 @@
-// Small helper around localStorage so the scraper page and the history page
+// Keeps recent scans in the browser so the History page can list them.
 
 const STORAGE_KEY = 'scrapeHistory';
 const MAX_ITEMS = 20;

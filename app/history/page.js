@@ -39,7 +39,7 @@ export default function HistoryPage() {
 
   return (
     <main className="px-4 pb-20">
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-6xl">
         <header className="mb-8 flex items-end justify-between gap-4">
           <div>
             <h1 className="mb-2 text-3xl font-bold text-white">History</h1>
@@ -82,7 +82,15 @@ export default function HistoryPage() {
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-white">{item.title}</p>
                   <p className="truncate text-xs text-blue-400/80">{item.url}</p>
-                  <p className="mt-1 text-xs text-gray-600">{timeAgo(item.scrapedAt)}</p>
+                  <div className="mt-1 flex items-center gap-2 text-xs text-gray-600">
+                    <span>{timeAgo(item.scrapedAt)}</span>
+                    {/* older entries were saved before site type existed */}
+                    {item.siteType && (
+                      <span className="rounded-full bg-gray-800 px-2 py-0.5 text-gray-400">
+                        {item.siteType}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex shrink-0 items-center gap-2">
