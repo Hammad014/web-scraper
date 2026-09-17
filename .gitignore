@@ -42,3 +42,5 @@ next-env.d.ts
 
 /.claude
 /.WebScraper_Plan_Hammad.docx
+
+/.gitignore
