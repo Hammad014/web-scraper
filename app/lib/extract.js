@@ -544,13 +544,18 @@ export function extractDoctors($, baseUrl) {
 
 // Pulls named items out of a listing page. Works whether the name is in the
 // link, in a heading beside it, or only in the address.
+// When the same address shows up twice, this decides which version to keep.
+function rank(item) {
+  return (item.description ? 1000 : 0) + (item.image ? 100 : 0) + item.name.length;
+}
+
 export function extractItems($, baseUrl, pattern, limit = 60) {
-  const items = [];
-  const seen = new Set();
+  // Keyed by address, because a card is normally linked two or three times
+  // over — from its picture, from its title, and from a "Read More" — and
+  // all of those are one item, not three.
+  const byUrl = new Map();
 
   $('a[href]').each((i, el) => {
-    if (items.length >= limit) return false;
-
     const href = $(el).attr('href');
     if (!href) return;
 
@@ -565,28 +570,32 @@ export function extractItems($, baseUrl, pattern, limit = 60) {
     const heading = card.find('h1, h2, h3, h4, h5, h6').first();
 
     // best name first: the link, then a heading in its card, then the address
-    let name = '';
-    if (anchorText && anchorText.length < 70 && !GENERIC_LINK_TEXT.test(anchorText)) {
-      name = anchorText;
+    let raw = '';
+    if (anchorText && anchorText.length < 90 && !GENERIC_LINK_TEXT.test(anchorText)) {
+      raw = anchorText;
     }
-    if (!name && heading.length) name = cleanText(heading.text()).slice(0, 70);
-    if (!name) {
+    if (!raw && heading.length) raw = cleanText(heading.text());
+    if (!raw) {
       const cardText = spacedText($, card);
-      if (cardText && cardText.length < 70) name = cardText;
+      if (cardText && cardText.length < 90) raw = cardText;
     }
-    if (!name) name = slugToName(absolute);
+    if (!raw) raw = slugToName(absolute);
 
-    name = tidyName(name);
+    // "Read More" glued onto a date makes a title of "Read More25 Jul 2024",
+    // which slips past the generic-text check because it isn't exactly that.
+    raw = cleanText(raw.replace(/read\s*more/gi, ' '));
+
+    let name = tidyName(raw);
     if (!name || name.length < 3) return;
+    if (/^[\d\s.,\-/]+$/.test(name)) return;                 // just a number
+    if (/^\d{1,2}\s+\w{3,9}\s+\d{4}$/.test(name)) return;    // just a date
     if (GENERIC_LINK_TEXT.test(name) || SERVICE_INDEX.test(name) || SERVICE_SKIP.test(name)) return;
 
-    const key = name.toLowerCase();
-    if (seen.has(key)) return;
-    seen.add(key);
-
+    // Strip the untruncated title, otherwise a long one leaves its own tail
+    // behind in the description.
     let description = spacedText($, card)
-      .replace(name, ' ')
-      .replace(/read more/gi, ' ')
+      .replace(raw, ' ')
+      .replace(/read\s*more/gi, ' ')
       .trim();
 
     // Some cards hold nothing but the title, so stripping the name leaves a
@@ -595,15 +604,34 @@ export function extractItems($, baseUrl, pattern, limit = 60) {
     if (description.length < 25 || restatesName) description = '';
     if (description.length > 220) description = description.slice(0, 220) + '…';
 
-    // Same as the doctor portraits: the picture often sits in a sibling of
-    // the block holding the title, so look one level out when the card has none.
-    items.push({
+    // cut a long title at a word, not mid-syllable
+    if (name.length > 70) name = name.slice(0, 70).replace(/\s+\S*$/, '') + '…';
+
+    const item = {
       name,
       url: absolute,
       description,
+      // the picture often sits in a sibling of the block holding the title,
+      // so look one level out when the card itself has none
       image: imageFrom($, card, baseUrl) || imageFrom($, card.parent(), baseUrl),
-    });
+    };
+
+    const existing = byUrl.get(absolute);
+    if (existing && rank(existing) >= rank(item)) return;
+    byUrl.set(absolute, item);
   });
+
+  // a second pass on names, for two addresses describing the same thing
+  const items = [];
+  const seen = new Set();
+
+  for (const item of byUrl.values()) {
+    const key = item.name.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    items.push(item);
+    if (items.length >= limit) break;
+  }
 
   return items;
 }
