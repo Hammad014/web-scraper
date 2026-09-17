@@ -16,7 +16,7 @@ export default function NavBar() {
 
   return (
     <nav className="sticky top-0 z-20 border-b border-gray-800 bg-gray-950/85 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-1 py-3">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
         <Link href="/" className="flex shrink-0 items-center gap-2">
           
           <span className="text-3xl font-semibold tracking-tight text-white">
